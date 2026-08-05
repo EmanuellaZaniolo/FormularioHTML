@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário com Auto-preenchimento de CEP</title>
+    <style>
+        /* Paleta de cores aplicada nas variáveis */
+        :root {
+            --bg-page: #FBEFEF;
+            --bg-container: #FFE2E2;
+            --border-color: #F5CBCB;
+            --primary-color: #C5B3D3;
+            --primary-hover: #F5CBCB;
+            --text-color: #4a3f55; /* Tom escuro para garantir leitura */
+            --input-bg: #ffffff;
+            --error-color: #e74c3c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--bg-container);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(197, 179, 211, 0.4); /* Sombra em tom lilás */
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--text-color);
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px 15px;
+            background-color: var(--input-bg);
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(197, 179, 211, 0.5);
+        }
+
+        input:disabled, input[readonly] {
+            background-color: #fcf4f4;
+            cursor: not-allowed;
+            color: #888;
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+            font-weight: bold;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(197, 179, 211, 0.5);
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+            color: var(--text-color);
+            box-shadow: 0 4px 10px rgba(245, 203, 203, 0.6);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Endereço de Entrega</h2>
+        <form id="enderecoForm">
+            
+            <div class="form-group">
+                <label for="cep">CEP</label>
+                <input type="text" id="cep" name="cep" maxlength="9" placeholder="00000-000" required>
+                <div class="error-message" id="cepError">CEP inválido ou não encontrado.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="rua">Logradouro (Rua)</label>
+                <input type="text" id="rua" name="rua" placeholder="Ex: Rua das Flores" required readonly>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="numero">Número</label>
+                    <input type="text" id="numero" name="numero" placeholder="123" required>
+                </div>
+                <div class="form-group">
+                    <label for="complemento">Complemento</label>
+                    <input type="text" id="complemento" name="complemento" placeholder="Apto 42">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="bairro">Bairro</label>
+                <input type="text" id="bairro" name="bairro" required readonly>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" style="flex: 2;">
+                    <label for="cidade">Cidade</label>
+                    <input type="text" id="cidade" name="cidade" required readonly>
+                </div>
+                <div class="form-group">
+                    <label for="uf">UF</label>
+                    <input type="text" id="uf" name="uf" required readonly>
+                </div>
+            </div>
+
+            <button type="submit">Confirmar Endereço</button>
+        </form>
+    </div>
+
+    <script>
+        const cepInput = document.getElementById('cep');
+        const ruaInput = document.getElementById('rua');
+        const bairroInput = document.getElementById('bairro');
+        const cidadeInput = document.getElementById('cidade');
+        const ufInput = document.getElementById('uf');
+        const numeroInput = document.getElementById('numero');
+        const cepError = document.getElementById('cepError');
+
+        cepInput.addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, ''); 
+            if (value.length > 5) {
+                value = value.replace(/^(\d{5})(\d)/, '$1-$2'); 
+            }
+            e.target.value = value;
+        });
+
+        cepInput.addEventListener('blur', async function() {
+            const cep = this.value.replace(/\D/g, '');
+
+            if (cep.length === 8) {
+                try {
+                    const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                    const data = await response.json();
+
+                    if (data.erro) {
+                        mostrarErro(true);
+                        limparCampos();
+                    } else {
+                        mostrarErro(false);
+                        ruaInput.value = data.logradouro;
+                        bairroInput.value = data.bairro;
+                        cidadeInput.value = data.localidade;
+                        ufInput.value = data.uf;
+                        
+                        numeroInput.focus();
+                        verificarCamposVazios();
+                    }
+                } catch (error) {
+                    mostrarErro(true);
+                    limparCampos();
+                    console.error('Erro ao buscar o CEP:', error);
+                }
+            } else if (cep.length > 0) {
+                mostrarErro(true);
+                limparCampos();
+            }
+        });
+
+        function mostrarErro(show) {
+            cepError.style.display = show ? 'block' : 'none';
+            if (show) {
+                cepInput.style.borderColor = 'var(--error-color)';
+            } else {
+                cepInput.style.borderColor = 'var(--border-color)';
+            }
+        }
+
+        function limparCampos() {
+            ruaInput.value = '';
+            bairroInput.value = '';
+            cidadeInput.value = '';
+            ufInput.value = '';
+            
+            ruaInput.readOnly = true;
+            bairroInput.readOnly = true;
+        }
+
+        function verificarCamposVazios() {
+            if (ruaInput.value === '') ruaInput.readOnly = false;
+            if (bairroInput.value === '') bairroInput.readOnly = false;
+        }
+
+        document.getElementById('enderecoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Formulário enviado com sucesso!\n\nDados validados e prontos para o backend.');
+        });
+    </script>
+</body>
+</html>
